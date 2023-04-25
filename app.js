@@ -1,50 +1,97 @@
+// const colorOpthions = document.getElementsByClassName("color-option");
+const modeBtn = document.getElementById("mode-btn");
+const destroyBtn = document.getElementById("destroy-btn");
+const eraserBtn = document.getElementById("eraser-btn");
+const colorOpthions = Array.from(document.getElementsByClassName("color-option"));
+const color = document.getElementById("color");
+const lineWidth = document.getElementById("line-width");
 const canvas = document.querySelector("canvas");
 const ctx = canvas.getContext("2d");
-canvas.width = 800;
-canvas.height = 800;
 
-// 1. Draw rectangles
-// ctx.rect(50, 50, 100, 100);
-// ctx.rect(150, 150, 100, 100);
-// ctx.rect(250, 250, 100, 100);
-// ctx.fill();
+ctx.lineWidth = lineWidth.value;
+let isPainsting = false;
+let isFilling = false;
 
-// ctx.beginPath(); // 새로 채움
-// ctx.rect(350, 350, 100, 100);
-// ctx.fillStyle = "red";
-// ctx.fill();
+const CANVAS_WIDTH = 800;
+const CANVAS_HEIGHT = 800;
 
-// ctx.moveTo(50, 50);
-// ctx.lineTo(150, 50);
-// ctx.lineTo(150, 150);
-// ctx.lineTo(50, 150);
-// ctx.lineTo(50, 50);
-// ctx.stroke();
+canvas.width = CANVAS_WIDTH;
+canvas.height = CANVAS_HEIGHT;
 
+function onMove(event){
+    if(isPainsting){
+        ctx.lineTo(event.offsetX, event.offsetY);
+        ctx.stroke();
+        return;
+    }
+    ctx.beginPath();
+    ctx.moveTo(event.offsetX, event.offsetY);
+}
+function startPainting (){
+    isPainsting = true;
+}
 
-// 2. Draw a house
-// ctx.fillRect(200, 200, 50, 200);
-// ctx.fillRect(400, 200, 50, 200);
-// ctx.lineWidth = 2;
-// ctx.strokeRect(300, 300, 50, 100);
-// ctx.fillRect(200, 200, 5 , 20);
-// ctx.moveTo(200, 200);
-// ctx.lineTo(325, 100);
-// ctx.lineTo(450, 200);
-// ctx.fill();
+function cancelPainting (){
+    isPainsting = false;
+}
 
+function onLineWidthChange(event){
+    console.log(event.target.value);
+    ctx.lineWidth = event.target.value;
+}
 
-// 3. Draw a person
-ctx.fillRect(210 -40, 200 -20, 15, 100); // arm
-ctx.fillRect(350 -40, 200 -20, 15, 100); // arm
-ctx.fillRect(260 -40, 200 -20, 60, 200); // body
+function onColorChange(event){
+    ctx.strokeStyle = event.target.value;
+    ctx.fillStyle = event.target.value;
+}
 
-// arc(x, y, radius, startAngle, endAngle, counterclockwise)
-ctx.arc(250, 100, 50, 0, 2 * Math.PI);
-ctx.fill();
+function onColorClick(event){
+    const colorValue = event.target.dataset.color;
+    ctx.strokeStyle = colorValue;
+    ctx.fillStyle = colorValue;
+    color.value = colorValue;
+}
 
-ctx.beginPath(); // To draw something new
-ctx.fillStyle = "white";
-ctx.arc(260 + 10, 80, 5, Math.PI, 2 * Math.PI);
-ctx.arc(220 + 10, 80, 5, Math.PI, 2 * Math.PI);
-ctx.fill();
+function onModeClick(){
+    if(isFilling){
+        isFilling = false;
+        modeBtn.innerText = "Fill";
+    } else {
+        isFilling = true;
+        modeBtn.innerText = "Draw";
+    }
+}
+
+function onCanvasClick(){
+    if(isFilling){
+        ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+    }
+}
+
+function onDestroyClick(){
+    ctx.fillStyle = "white";
+    ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+}
+
+function onEraserClick(){
+    ctx.strokeStyle = "white";
+    isFilling = false;
+    modeBtn.innerText = "Fill";
+}
+
+canvas.addEventListener("mousemove", onMove);
+canvas.addEventListener("mousedown", startPainting);
+canvas.addEventListener("mouseup", cancelPainting);
+canvas.addEventListener("mouseleave", cancelPainting);
+canvas.addEventListener("click", onCanvasClick);
+
+lineWidth.addEventListener("change", onLineWidthChange);
+color.addEventListener("change", onColorChange);
+
+console.log(colorOpthions);
+
+colorOpthions.forEach(color => color.addEventListener("click", onColorClick));
+
+modeBtn.addEventListener("click", onModeClick);
+destroyBtn.addEventListener("click", onDestroyClick);
+eraserBtn.addEventListener("click", onEraserClick);
